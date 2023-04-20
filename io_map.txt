@@ -1,0 +1,66 @@
+Arduino UNO (Backend)
+ PORTB
+  N/C
+ PORTC
+  N/C
+ PORTD (General IO)
+  D0 -> USART TX             -> OUT
+  D1 -> USART RX             <- IN
+  D2 -> Tick Indicator (LED) -> OUT
+  D3 -> Motion Detector      <- IN (interrupt)
+  D4 -> N/C
+  D5 -> N/C
+  D6 -> Alarm Buzzer        -> OUT (PWM)
+  D7 -> Alarm Digital Out   -> OUT
+
+Arduino Mega (Frontend)
+ PORTA
+  N/C
+ PORTB
+  N/C
+ PORTC (LCD data)
+  C0 -> LCD D0 -> IN/OUT
+  C1 -> LCD D1 -> IN/OUT
+  C2 -> LCD D2 -> IN/OUT
+  C3 -> LCD D3 -> IN/OUT
+  C4 -> LCD D4 -> IN/OUT
+  C5 -> LCD D5 -> IN/OUT
+  C6 -> LCD D6 -> IN/OUT
+  C7 -> LCD D7 -> IN/OUT
+ PORTD
+  D0 -> Tick Indicator (LED) -> OUT
+  D1 -> N/C
+  D2 -> USART RX (+ LED)     <- IN
+  D3 -> USART TX (+ LED)     -> OUT
+  D4 -> N/C
+  D5 -> N/C 
+  D6 -> N/C
+  D7 -> N/C
+ PORTE
+  N/C
+ PORTF
+  N/C
+ PORTG
+  N/C
+ PORTH
+  N/C
+ PORTJ
+  N/C
+ PORTK (Keypad)
+  K0 -> Col A-D <- IN (pullup, interrupt)
+  K1 -> Col 3-# <- IN (pullup, interrupt)
+  K2 -> Col 2-0 <- IN (pullup, interrupt)
+  K3 -> Col 1-* <- IN (pullup, interrupt)
+  K4 -> Row *-D -> OUT
+  K5 -> Row 7-C -> OUT
+  K6 -> Row 4-B -> OUT
+  K7 -> Row 1-A -> OUT
+ PORTL (LCD control)
+  L0 -> LCD Register Select (RS) -> OUT
+  L1 -> LCD Read Write      (RW) -> OUT
+  L2 -> LCD Clock           (E)  -> OUT
+  L3 -> LCD Backlight Anode (A)  -> OUT
+  L4 -> N/C
+  L5 -> N/C
+  L6 -> N/C
+  L7 -> N/C

@@ -1,0 +1,38 @@
+// vim: ft=.c
+// this file is used by globals.h and globals.c to initialize
+// structures at compile time and to automatically convert
+// string ids/codes into enumerations
+
+// format:
+// event codes    -> _C_(<code>)
+// event handlers -> _H_(<id>, <handler>, <code>, <disable>)
+
+// common
+_C_( STATE  ) // state change
+_C_( TIMER  ) // global 10Hz tick timer
+_C_( SERIAL ) // serial packet received/transmitted
+
+_H_( TICK_SHOW    , e_tick_show    , TIMER , 0 ) // common/tick.c
+_H_( SERIAL_PACKET, e_serial_packet, SERIAL, 0 ) // program/program.c
+
+// frontend: LCD, keypad, buzzer
+#if PLATFORM == MEGA
+
+_C_( BUTTON ) // button input
+
+_H_( SCREEN_BLINK, e_screen_blink, TIMER , 1 ) // program/screen.c
+_H_( BUTTON_TIMER, e_button_timer, TIMER , 1 ) // program/button.c
+_H_( BUTTON_INPUT, e_button_input, BUTTON, 0 ) // program/program.c
+
+// backend: motion sensor, buzzer, alarm logic
+#elif PLATFORM == UNO
+
+_C_( MOTION ) // motion detected
+
+_H_( ALARM_TIMER   , e_alarm_timer   , TIMER , 1 ) // program/alarm.c
+_H_( MOTION_TIMER  , e_motion_timer  , TIMER , 1 ) // program/motion.c
+_H_( MOTION_TRIGGER, e_motion_trigger, MOTION, 0 ) // program/program.c
+
+_H_( SERIAL_TEST, e_send_timer, TIMER, 0 )
+
+#endif

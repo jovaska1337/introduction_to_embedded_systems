@@ -1,6 +1,10 @@
 ## BL40A1812 - Introduction to Embedded Systems 
 This repository contains the source code of my excercise work.
 
+`util.sh` is a AVR utility tool, which allows compilation and uploading +
+several other features. `do.sh` is set up to compile this repostitory by
+calling `util.sh`.
+
 `io_map.txt` contains IO mappings for both devices. `frontend` contains
 the code running on the Arduino Mega and `backend` the code for Arduino UNO,
 both of which have `shared` symlinked internally.

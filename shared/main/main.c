@@ -68,7 +68,7 @@ main:
 	/* main() runs the global event loop and puts the CPU into sleep
 	 * if no events are coming in (ie. only possible event sources are
 	 * interrupt handlers), thus this loop will run at least at the
-	 * configured global timer interrupt frequency.
+	 * configured global tick timer interrupt frequency.
 	 */
 	if (unlikely(ev_run() < 1))
 	    	sleep(); // sleep until interrupt

@@ -45,8 +45,6 @@ u8 e_serial_packet(u8 unused id, u8 unused code, sev_t *arg)
 	return 0;
 }
 
-static ring_t fuck = ring_init(u16, 8);
-
 // button event handler
 u8 e_button_input(u8 unused id, u8 unused code, ptr arg)
 {
@@ -67,19 +65,8 @@ u8 e_button_input(u8 unused id, u8 unused code, ptr arg)
 		serial_rx_next();
 		break;
 	case K1|UP:
-		screen_clear();
-		screen_goto(0, 0);
-		screen_puts(PSTR("NIGGER"), NULLTERM, ROMSTR);
-		screen_flush();
-		for (u16 i = 1337; i < 1400; i++)
-			ring_put(&fuck, &i, 0);
 		break;
 	case K2|UP:
-		screen_clear();
-		screen_goto(0, 0);
-		screen_puts(PSTR("FAGGOT"), NULLTERM, ROMSTR);
-		screen_flush();
-		while (ring_pop(&fuck, NULL) != NULL);
 		break;
 	}
 

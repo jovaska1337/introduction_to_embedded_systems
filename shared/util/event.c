@@ -97,8 +97,8 @@ u8 event_run(event_loop_t *loop)
 }
 
 // dispatch event to an event loop
-u8 event_dispatch(event_loop_t *loop, event_t *event)
+u8 event_dispatch(event_loop_t *loop, const event_t *event, u8 flags)
 {
 	// add event to buffer (may be discarded)
-	return ring_put(loop->buffer, event, 0) == NULL;
+	return ring_put(loop->buffer, (ptr)event, flags) == NULL;
 }

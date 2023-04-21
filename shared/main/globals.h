@@ -37,7 +37,7 @@ typedef enum {
 // the argument parameter as optional (NULL)
 #define __dispatch(code, arg) do { \
 	event_t __event = {(_event_code_t)code, (arg)}; \
-	event_dispatch(&g_event_loop, &__event); \
+	event_dispatch(&g_event_loop, &__event, 0); \
 	} while (0)
 #define __dispatch_expand(a, b) __dispatch(a, b)
 #define __dispatch_arg(a, b, ...) b

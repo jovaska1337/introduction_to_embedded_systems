@@ -3,12 +3,17 @@
 
 #include "util/type.h"
 
-#define ALARM_MODULATE_TICKS 1
+#define BUZMOD_TICKS 1
+#define ALARM_FREQ 500
+
+#define BUZOFF 0
+#define BUZON  (1 << 0)
+#define BUZMOD (1 << 2)
+
+// control buzzer separately
+void buzzer_set(u16 freq, u8 flags);
 
 // set alarm status
 void alarm_set(u8 disable);
-
-// set buzzer frequency
-void alarm_freq(u16 freq);
 
 #endif // !ALARM_H

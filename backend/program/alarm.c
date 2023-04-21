@@ -19,42 +19,18 @@ static const struct {
 
 static u8 bits, count, ticks;
 
-void alarm_set(u8 disable)
-{
-	save_int();
-
-	if (disable) {
-		// disable timer
-		TCCR0B &= ~7;
-
-		// disable modulator
-		ticks = 0;
-		ev_set_id(ALARM_TIMER, 1);
-
-		// disable digital output
-		PIND &= ~_BV(7);
-	} else {
-		// enable timer
-		TCCR0B |= bits;
-		OCR0A   = count;
-
-		// enable modulator
-		ticks = ALARM_MODULATE_TICKS;
-		ev_set_id(ALARM_TIMER, 0);
-		
-		// enable digital output
-		PIND |= _BV(7);
-	}
-
-	rest_int();
-}
-
-void alarm_freq(u16 freq)
+void buzzer_set(u16 freq, u8 flags)
 {
 	u32 old, now;
 	u8 i;
 
 	save_int();
+
+	// turn buzzer off
+	if (flags == BUZOFF) {
+		TCCR0B &= ~7;
+		goto end;
+	}
 
 	// select best prescaler (largest compare match value)
 	i = 0;
@@ -70,9 +46,41 @@ void alarm_freq(u16 freq)
 	}
 	i -= !!i;
 
-	// set globals
-	bits  = rom(ps[i].bits, byte);
-	count = old;
+	// enable timer
+	TCCR0B |= rom(ps[i].bits, byte);
+	OCR0A   = old;
+
+	// enablke modulator
+	if (flags & BUZMOD) {
+		// set globals
+		bits  = TCCR0B & 7;
+		count = OCR0A;
+
+		// start timer
+		ticks = BUZMOD_TICKS;
+		ev_set_id(ALARM_TIMER, 0);
+	}
+end:
+	rest_int();
+}
+
+void alarm_set(u8 disable)
+{
+	save_int();
+
+	if (disable) {
+		// disable buzzer
+		buzzer_set(0, BUZOFF);
+
+		// disable digital output
+		PIND &= ~_BV(7);
+	} else {
+		// enable buzzer
+		buzzer_set(ALARM_FREQ, BUZON | BUZMOD);
+		
+		// enable digital output
+		PIND |= _BV(7);
+	}
 
 	rest_int();
 }
@@ -81,6 +89,7 @@ u8 e_alarm_timer(u8 unused id, u8 unused code, ptr unused arg)
 {
 	if (ticks-- > 0)
 		return 0;
+	ticks = BUZMOD_TICKS;
 
 	// we have a capacitor on the buzzer, so it doesn't
 	// matter if the timer leaves the pin high
@@ -90,8 +99,6 @@ u8 e_alarm_timer(u8 unused id, u8 unused code, ptr unused arg)
 		TCCR0B = bits;
 		OCR0A  = count;
 	}
-
-	ticks = ALARM_MODULATE_TICKS;
 
 	return 0;
 }

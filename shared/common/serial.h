@@ -4,6 +4,7 @@
 #include "util/type.h"
 #include "util/attr.h"
 #include "util/ring.h"
+#include "common/state.h"
 
 // how many packets to buffer
 #define SERIAL_BUFSIZE 3 // (1 << 3) = 8
@@ -13,7 +14,7 @@ typedef struct {
 	// packet type enumeration
 	enum {
 		ACK,     // acknowledge previous transmission
-		CHKLINK, // check link
+		SYNC,    // synchronize state
 		CHANGE,  // state change
 		CHKCODE, // unlock with code
 		NEWCODE  // change unlock code
@@ -25,18 +26,19 @@ typedef struct {
 			enum { OK, ERROR } packed status;
 		} packed ack;
 		struct {
-			char dummy[0];
-		} packed check;
+			sstate_t now;
+		} packed sync;
 		struct {
-			u8 state;
-		} packed state;
+			sstate_t old; 
+			sstate_t now;
+		} packed change;
 		struct {
 			u16 code;
-		} packed unlock;
+		} packed chkcode;
 		struct {
 			u16 old_code;
 			u16 new_code;
-		} packed change;
+		} packed newcode;
 	} content;
 } packed packet_t;
 

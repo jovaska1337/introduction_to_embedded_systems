@@ -4,6 +4,7 @@
 #include "util/attr.h"
 #include "util/type.h"
 #include "util/ring.h"
+#include "util/memory.h"
 
 // passed to dispatch() from stack
 typedef struct {
@@ -42,6 +43,6 @@ void event_set_code(event_loop_t *loop, u8 code, u8 disable);
 u8 event_run(event_loop_t *loop);
 
 // dispatch event to an event loop
-u8 event_dispatch(event_loop_t *loop, event_t *event);
+u8 event_dispatch(event_loop_t *loop, const event_t *event, u8 flags);
 
 #endif // !EVENT_H

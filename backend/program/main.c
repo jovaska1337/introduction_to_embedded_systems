@@ -7,7 +7,7 @@
 
 #include <avr/eeprom.h>
 
-#define ALARM_TIMEOUT_TICKS 30
+#define ALARM_TIMEOUT_TICKS 100
 
 // different program states
 static sstate_t sstate = INIT;

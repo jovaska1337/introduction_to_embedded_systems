@@ -596,7 +596,7 @@ u8 e_button_input(u8 unused id, u8 unused code, u32 *arg)
 			screen_flush();
 
 			// erase from code_input
-			code_input &= 0xF << 2*code_index;
+			code_input &= ~(0xF << 2*code_index);
 
 			// move cursor
 			if (code_index < 3)

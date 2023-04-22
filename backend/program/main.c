@@ -14,8 +14,8 @@ static sstate_t sstate = INIT;
 static istate_t istate = BOOT;
 
 // event data for each type
-static stev_t stev_sstate  = { .type = SHARED   };
-static stev_t stev_istate  = { .type = INTERNAL };
+static stev_t stev_sstate = { .type = SHARED   };
+static stev_t stev_istate = { .type = INTERNAL };
 
 // state change dispatcher
 #define change(what, to) ({ \

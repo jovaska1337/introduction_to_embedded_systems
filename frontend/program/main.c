@@ -6,12 +6,12 @@
 #include "program/button.h" 
 
 // different program states
-static sstate_t  sstate  = INIT;
-static istate_t  istate  = BOOT;
+static sstate_t sstate = INIT;
+static istate_t istate = BOOT;
 
 // event data for each type
-static stev_t stev_sstate  = { .type = SHARED   };
-static stev_t stev_istate  = { .type = INTERNAL };
+static stev_t stev_sstate = { .type = SHARED   };
+static stev_t stev_istate = { .type = INTERNAL };
 
 // how long to keep messages on screen
 #define MSG_TICKS 10
@@ -668,8 +668,6 @@ u8 e_button_input(u8 unused id, u8 unused code, u32 *arg)
 
 	return 0;
 }
-
-u8 my_char = 0;
 
 // timer event handler
 u8 e_program_timer(u8 unused id, u8 unused code, ptr unused arg)

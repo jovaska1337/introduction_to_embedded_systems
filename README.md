@@ -5,7 +5,7 @@ This repository contains the source code of my excercise work.
 several other features. `do.sh` is set up to compile this repository by
 calling `util.sh`. avr-gcc, avr-binutils ([with avr-binutils-size.patch](
 https://github.com/jovaska1337/portage_patches/blob/master/cross-avr/binutils/avr-binutils-size.patch
-)), bash and other basic unix utilities are required for them to work.
+)), avrdude, bash and other basic unix utilities are required for them to work.
 
 To compile and upload this given your setup is correct, connect Arduino UNO
 first (so it becomes /dev/ttyACM0) and then connect Arduino Mega (so it

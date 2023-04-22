@@ -5,6 +5,8 @@
 #include "program/alarm.h"
 #include "program/motion.h"
 
+#include <avr/eeprom.h>
+
 #define ALARM_TIMEOUT_TICKS 30
 
 // different program states
@@ -49,19 +51,23 @@ static u8 boot_sequence()
 }
 
 // TODO: put in internal EEPROM
-static u16 my_code = 0;
+static u16 code_mem EEMEM;
+static u16 code_ram;
 
 static u8 check_code(u16 code)
 {
-	return my_code == code;
+	// check against RAM code for speed
+	return code_ram == code;
 }
 
 static u8 change_code(u16 old, u16 new)
 {
-	if (old != my_code)
+	if (old != code_ram)
 		return 0;
 
-	my_code = new;
+	// update code in RAM and EEPROM
+	code_ram = new;
+	eeprom_update_word(&code_mem, new);
 
 	return 1;
 }
@@ -336,4 +342,16 @@ u8 e_program_timer(u8 id, u8 unused code, ptr unused arg)
 // initial event (can't use dispatch() as .init section code
 // stack isn't addressable by functions for some reason)
 static const event_t boot_event PROGMEM = { STATE, &stev_istate };
-INIT() { (void)event_dispatch(&g_event_loop, &boot_event, ROMDATA); }
+INIT()
+{
+#if 0
+	// initial EEPROM code
+	eeprom_update_word(&code_mem, 0);
+	while (1);
+#endif
+	// read code into ram
+	code_ram = eeprom_read_word(&code_mem);
+
+	// dispatch boot event
+	(void)event_dispatch(&g_event_loop, &boot_event, ROMDATA);
+}

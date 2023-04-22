@@ -29,6 +29,7 @@ void buzzer_set(u16 freq, u8 flags)
 	// turn buzzer off
 	if (flags == BUZOFF) {
 		TCCR0B &= ~7;
+		ev_set_id(ALARM_TIMER, 1);
 		goto end;
 	}
 
@@ -73,13 +74,13 @@ void alarm_set(u8 disable)
 		buzzer_set(0, BUZOFF);
 
 		// disable digital output
-		PIND &= ~_BV(7);
+		PORTD &= ~_BV(7);
 	} else {
 		// enable buzzer
 		buzzer_set(ALARM_FREQ, BUZON | BUZMOD);
 		
 		// enable digital output
-		PIND |= _BV(7);
+		PORTD |= _BV(7);
 	}
 
 	rest_int();

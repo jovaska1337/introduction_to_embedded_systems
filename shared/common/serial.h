@@ -6,6 +6,8 @@
 #include "util/ring.h"
 #include "common/state.h"
 
+// this packet system is trash, it should be redesigned
+
 // how many packets to buffer
 #define SERIAL_BUFSIZE 3 // (1 << 3) = 8
 
@@ -13,28 +15,45 @@
 typedef struct {
 	// packet type enumeration
 	enum {
-		ACK,     // acknowledge previous transmission
 		SYNC,    // synchronize state
 		CHANGE,  // state change
 		CHKCODE, // unlock with code
 		NEWCODE  // change unlock code
 	} packed type;
 
-	// packet content (allocates the largest required size)
+	// message mode
+	enum { REQUEST, RESPONSE, MESSAGE } packed mode;
+
+	// mode specific header
 	union {
 		struct {
-			enum { OK, ERROR } packed status;
-		} packed ack;
+			u8 dummy[0]; // empty
+		} packed request;
+
+		struct {
+			enum { OK, FAIL } packed status;
+		} packed response;
+
+		struct {
+			u8 dummy[0]; // empty
+		} packed message;
+	} packed header;
+
+	// packet body
+	union {
 		struct {
 			sstate_t now;
 		} packed sync;
+
 		struct {
 			sstate_t old; 
 			sstate_t now;
 		} packed change;
+
 		struct {
 			u16 code;
 		} packed chkcode;
+
 		struct {
 			u16 old_code;
 			u16 new_code;

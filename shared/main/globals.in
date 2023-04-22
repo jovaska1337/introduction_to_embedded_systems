@@ -9,22 +9,28 @@
 
 // common
 _C_( STATE  ) // state change
-_C_( TIMER  ) // global 10Hz tick timer
+_C_( TIMER  ) // global tick timer
 _C_( SERIAL ) // serial packet received/transmitted
 
-_H_( TICK_SHOW    , e_tick_show    , TIMER , 0 ) // common/tick.c
-_H_( PROGRAM_TIMER, e_program_timer, TIMER , 1 ) // program/main.c
-_H_( SERIAL_PACKET, e_serial_packet, SERIAL, 0 ) // program/main.c
-_H_( STATE_CHANGE , e_state_change , STATE , 0 ) // program/main.c
+_H_( TICK_SHOW    , e_tick_show     , TIMER , 0 ) // common/tick.c
+_H_( PROGRAM_TIMER, e_program_timer , TIMER , 1 ) // program/main.c
+_H_( SERIAL_PACKET, e_serial_packet , SERIAL, 0 ) // program/main.c
+_H_( STATE_CHANGE , e_state_change  , STATE , 0 ) // program/main.c
 
 // frontend: LCD, keypad, buzzer
 #if PLATFORM == MEGA
 
 _C_( BUTTON ) // button input
+_C_( ONCODE ) // user wrote code
+_C_( SELECT ) // menu item selected
 
-_H_( SCREEN_BLINK, e_screen_blink, TIMER , 1 ) // program/screen.c
-_H_( BUTTON_TIMER, e_button_timer, TIMER , 1 ) // program/button.c
-_H_( BUTTON_INPUT, e_button_input, BUTTON, 0 ) // program/main.c
+_H_( SCREEN_BLINK  , e_screen_blink  , TIMER , 1 ) // program/screen.c
+_H_( BUTTON_TIMER  , e_button_timer  , TIMER , 1 ) // program/button.c
+_H_( STSYNC_TIMER  , e_stsync_timer  , TIMER , 0 ) // program/main.c
+_H_( SERIAL_TIMEOUT, e_serial_timeout, TIMER , 1 ) // program/main.c
+_H_( BUTTON_INPUT  , e_button_input  , BUTTON, 0 ) // program/main.c
+_H_( ONCODE_INPUT  , e_oncode_input  , ONCODE, 0 ) // program/main.c
+_H_( MENU_SELECTION, e_menu_selection, SELECT, 0 ) // program/main.c
 
 // backend: motion sensor, buzzer, alarm logic
 #elif PLATFORM == UNO

@@ -22,7 +22,7 @@ static stev_t stev_istate  = { .type = INTERNAL };
 	dispatch(STATE, &stev_##what##state); })
 
 // timer ticks
-static u16 ticks;
+static u8 ticks;
 
 static u8 boot_counter;
 
@@ -49,7 +49,7 @@ static u8 boot_sequence()
 }
 
 // TODO: put in internal EEPROM
-static u16 my_code = (4 << 6) | (3 << 4) | (2 << 2) | 1;
+static u16 my_code = 0;
 
 static u8 check_code(u16 code)
 {
@@ -105,6 +105,9 @@ static void sstate_change(sstate_t old, sstate_t now)
 		case ALRM:
 			alarm_set(1);
 			break;
+
+		default:
+			break;
 		}
 		break;
 	}
@@ -112,7 +115,7 @@ static void sstate_change(sstate_t old, sstate_t now)
 	rest_int();
 }
 
-static void istate_change(istate_t old, istate_t now)
+static void istate_change(istate_t unused old, istate_t now)
 {
 	save_int();
 
@@ -121,7 +124,7 @@ static void istate_change(istate_t old, istate_t now)
 		(void) boot_sequence();
 		break;
 
-	case WAIT:  // waiting for events
+	case IDLE: // waiting for events
 		// allow serial events
 		serial_rx_next();
 		serial_tx_next();
@@ -143,6 +146,7 @@ u8 e_state_change(u8 unused id, u8 unused code, stev_t *data)
 		// prepare sync packet
 		packet_t tmp;
 		tmp.type = CHANGE;
+		tmp.mode = MESSAGE;
 		tmp.content.change.old = data->old;
 		tmp.content.change.now = data->now;
 
@@ -150,14 +154,14 @@ u8 e_state_change(u8 unused id, u8 unused code, stev_t *data)
 		serial_tx(&tmp, 0);
 
 		// internal change handler
-		sstate_change(data->old, data->now);
 		sstate = data->now;
+		sstate_change(data->old, data->now);
 		break;
 
 	// internal state changes
 	case INTERNAL:
-		istate_change(data->old, data->now);
 		istate = data->now;
+		istate_change(data->old, data->now);
 		break;
 	}
 
@@ -167,9 +171,6 @@ u8 e_state_change(u8 unused id, u8 unused code, stev_t *data)
 // serial event handler
 u8 e_serial_packet(u8 unused id, u8 unused code, sev_t *arg)
 {
-	packet_t rsp;
-
-	// no fail condition at the moment, silently ignored
 	if (arg->flags & FAIL)
 		return 0;
 
@@ -179,73 +180,67 @@ u8 e_serial_packet(u8 unused id, u8 unused code, sev_t *arg)
 
 	// has to be a received packet
 	} else {
-		// must be in waiting state
-		if (istate != WAIT)
-			goto end;
+		packet_t tmp;
 
 		// handle packets
 		switch (arg->target.type) {
-		// previous transmission acknowledged
-		case ACK:
-			// TODO: retransmit timeout, check previous transmission
-			break;
-
 		// manual state sync
 		case SYNC:
 			// prepare response
-			rsp.type = SYNC;
-			rsp.content.sync.now = sstate;
+			tmp.type = SYNC;
+			tmp.mode = RESPONSE;
+			tmp.header.response.status = OK;
+			tmp.content.sync.now = sstate;
 
 			// transmit response
-			serial_tx(&rsp, 0);
+			serial_tx(&tmp, 0);
 			break;
 
 		// state change
 		case CHANGE:
-			rsp.type = ACK;
+			tmp.type = CHANGE;
+			tmp.mode = RESPONSE;
 
 			// frontend can initiate state change when unlocked
 			if (sstate == ULCK) {
-				// acknowledge with OK
-				rsp.content.ack.status = OK;
+				tmp.header.response.status = OK;
 			
 				// dispatch state change and let
 				// the handler sync shared state
 				change(s, arg->target.content.change.now);
 
-			// acknowledge with error
 			} else {
-				rsp.content.ack.status = ERROR;
+				tmp.header.response.status = FAIL;
 			}
-
+			
 			// transmit response
-			serial_tx(&rsp, 0);
+			serial_tx(&tmp, 0);
 			break;
 
 		// check code (initiates state change on success)
 		case CHKCODE:
-			rsp.type = ACK;
+			tmp.type = CHKCODE;
+			tmp.mode = RESPONSE;
 
 			// check code
 			if (check_code(arg->target.content.chkcode.code)) {
-				// respond with OK
-				rsp.content.ack.status = OK;
+				tmp.header.response.status = OK;
 
 				// change state to unlocked
 				change(s, ULCK);
 
-			// acknowledge with error
 			} else {
-				rsp.content.ack.status = ERROR;
+				tmp.header.response.status = FAIL;
 			}
 
 			// transmit response
-			serial_tx(&rsp, 0);
+			serial_tx(&tmp, 0);
 			break;
 
 		// change code
 		case NEWCODE:
-			rsp.type = ACK;
+			tmp.type = NEWCODE;
+			tmp.mode = RESPONSE;
 
 			// code can only be changed when unlocked
 			if (sstate == ULCK) {
@@ -254,23 +249,23 @@ u8 e_serial_packet(u8 unused id, u8 unused code, sev_t *arg)
 					arg->target.content.newcode.old_code,
 					arg->target.content.newcode.new_code)
 				) {
-					rsp.content.ack.status = OK;
+					tmp.header.response.status = OK;
 
 				// invalid old code
 				} else {
-					rsp.content.ack.status = ERROR;
+					tmp.header.response.status = FAIL;
 				}
 			
 			// acknowledge with error
 			} else {
-				rsp.content.ack.status = ERROR;
+				tmp.header.response.status = FAIL;
 			}
 
 			// transmit response
-			serial_tx(&rsp, 0);
+			serial_tx(&tmp, 0);
 			break;
 		}
-end:
+
 		serial_rx_next(); // allow next packet to be received
 	}
 
@@ -310,7 +305,7 @@ u8 e_program_timer(u8 id, u8 unused code, ptr unused arg)
 		// switch to on
 		if (boot_sequence()) {
 			// change state
-			change(i, WAIT);
+			change(i, IDLE);
 
 			// disable self
 			ev_set_id(id, 1);
@@ -318,7 +313,7 @@ u8 e_program_timer(u8 id, u8 unused code, ptr unused arg)
 		break;
 
 	// waiting state (on)
-	case WAIT:
+	case IDLE:
 		switch (sstate) {
 		// trigger alarm on timeout
 		case ALRT:

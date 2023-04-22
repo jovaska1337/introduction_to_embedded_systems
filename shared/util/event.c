@@ -49,13 +49,13 @@ void event_set_code(event_loop_t *loop, u8 code, u8 disable)
 // run an event loop (handle buffered events)
 u8 event_run(event_loop_t *loop)
 {
-	event_t *ev;
+	event_t ev;
 	u8 p = 0;
 
 	save_int();
 
 	// loop through event buffer
-	while ((ev = ring_get(loop->buffer, 0)) != NULL)
+	while (ring_pop(loop->buffer, &ev) != NULL)
 	{
 		// call event handlers
 		for (u8 i = 0; i < loop->n_handlers; i++)
@@ -68,14 +68,14 @@ u8 event_run(event_loop_t *loop)
 
 			// call event handler if event code matches
 			if (unlikely(
-				rom(h->rom->code, word) == ev->code
+				rom(h->rom->code, word) == ev.code
 			)) {
 				sei(); // enable interrupts
 
 				// run with interrupts enabled
 				u8 r = rom(h->rom->func, ptr)(
 					rom(h->rom->id, word),
-					ev->code, ev->arg);
+					ev.code, ev.arg);
 
 				cli(); // disable interrupts
 
@@ -84,9 +84,6 @@ u8 event_run(event_loop_t *loop)
 					break;
 			}
 		}
-
-		// pop current event
-		ring_pop(loop->buffer, NULL);
 
 		p++; // increment no. of handled events
 	}

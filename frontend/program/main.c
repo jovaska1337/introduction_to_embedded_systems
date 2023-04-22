@@ -139,6 +139,35 @@ static u8 boot_sequence()
 	return 0;
 }
 
+#define ANIM_TICKS 10
+
+static const chr idle_text[] PROGMEM = "PRESS ANY KEY";
+
+// __builtin_strlen() will hopefully eval at compile time 
+#define MOVEMENT (SCREEN_COLS - __builtin_strlen(idle_text))
+
+static u8 anim_counter;
+
+static void idle_animation()
+{
+	if (anim_counter < 1) {
+		screen_goto(1, 0);
+		screen_puts((ptr)idle_text, NULLTERM, ROMSTR);
+		screen_putc(' ', 0);
+	} else if (anim_counter <= MOVEMENT) {
+		screen_goto(1, anim_counter - 1);
+		screen_putc(' ', 0);
+		screen_puts((ptr)idle_text, NULLTERM, ROMSTR);
+	} else {
+		screen_goto(1, 2*MOVEMENT - anim_counter);
+		screen_puts((ptr)idle_text, NULLTERM, ROMSTR);
+		screen_putc(' ', 0);
+	}
+
+	screen_flush();
+	anim_counter = (anim_counter + 1) % (2*MOVEMENT);  
+}
+
 #define DEF_PSTR_PTR(name, str) \
 	static const char PSTR_PTR_##name[] PROGMEM = (str)
 
@@ -361,6 +390,10 @@ static void istate_change(istate_t old, istate_t now)
 		break;
 
 	case IDLE: // idle state
+		anim_counter = 0;
+		ticks = ANIM_TICKS;
+		idle_animation();
+		ev_set_id(PROGRAM_TIMER, 0);
 		ev_set_id(BUTTON_INPUT, 0);
 		break;
 	}
@@ -668,6 +701,12 @@ u8 e_program_timer(u8 unused id, u8 unused code, ptr unused arg)
 	case CODE:
 		ev_set_id(BUTTON_INPUT, 0);
 		change(i, IDLE);
+		break;
+	
+	// idle animation
+	case IDLE:
+		idle_animation();
+		ticks = ANIM_TICKS;
 		break;
 	
 	// not configured

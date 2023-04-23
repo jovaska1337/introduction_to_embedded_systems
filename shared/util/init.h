@@ -11,7 +11,7 @@
 #define __INIT(N) \
 	static naked void __init##N() \
 		__attribute__((section(".init" #N))); \
-	static void used __init##N()
+	static void _used __init##N()
 #define __INIT_EXPAND(N) __INIT(N)
 #define __INIT_ARG(N, M, ...) M
 #define INIT(...) __INIT_EXPAND(__INIT_ARG(,##__VA_ARGS__, 7))

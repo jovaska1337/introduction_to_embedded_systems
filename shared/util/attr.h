@@ -4,7 +4,7 @@
 // GCC attributes
 #define noreturn    __attribute__((noreturn))
 #define unused      __attribute__((unused))
-#define used        __attribute__((used))
+#define _used       __attribute__((used))
 #define naked       __attribute__((naked))
 #define packed      __attribute__((packed))
 #define may_alias   __attribute__((__may_alias__))

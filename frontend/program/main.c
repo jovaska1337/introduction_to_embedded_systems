@@ -310,12 +310,6 @@ static void istate_change(istate_t old, istate_t now)
 {
 	save_int();
 
-	// transition from boot should enable serial
-	if (unlikely(old == BOOT)) {
-		// allow serial events
-		serial_rx_next();
-		serial_tx_next();
-	}
 	// old state cleanup
 	switch (old) {
 	case BOOT: // booting up
@@ -762,4 +756,12 @@ u8 e_stsync_timer(u8 unused id, u8 unused code, ptr unused arg)
 // initial event (can't use dispatch() as .init section code
 // stack isn't addressable by functions for some reason)
 static const event_t boot_event PROGMEM = { STATE, &stev_istate };
-INIT() { (void)event_dispatch(&g_event_loop, &boot_event, ROMDATA); }
+INIT()
+{
+	// enable serial
+	serial_rx_next();
+	serial_tx_next();
+
+	// send initial state change
+	(void)event_dispatch(&g_event_loop, &boot_event, ROMDATA);
+}

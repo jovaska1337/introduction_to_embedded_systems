@@ -91,6 +91,9 @@ static u16 scan()
 			PORTK = _BV(j + 4) | COLS; // set row high
 
 			_NOP(); // wait for pin setup
+			_NOP();
+			_NOP();
+			_NOP();
 
 			/* if column sees high, button is down */
 			if (PINK & _BV(i)) {

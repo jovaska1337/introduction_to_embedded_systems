@@ -24,6 +24,7 @@ void screen_io(sio_t type, u8 *data)
 	_NOP();
 	_NOP();
 	_NOP();
+	_NOP();
 
 	PORTL |= _BV(2); // clock high
 
@@ -32,6 +33,7 @@ void screen_io(sio_t type, u8 *data)
 		DDRC = 0;
 
 		// data setup takes max 360ns (~6 nops) from clock edge
+		_NOP();
 		_NOP();
 		_NOP();
 		_NOP();
@@ -51,6 +53,7 @@ void screen_io(sio_t type, u8 *data)
 		_NOP();
 		_NOP();
 		_NOP();
+		_NOP();
 	}	
 
 	PORTL &= ~_BV(2); // clock low
@@ -58,6 +61,7 @@ void screen_io(sio_t type, u8 *data)
 	// read
 	if (type & 2) {
 		// wait for > 360 ns (~6 nops)
+		_NOP();
 		_NOP();
 		_NOP();
 		_NOP();

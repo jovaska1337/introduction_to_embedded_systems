@@ -63,14 +63,13 @@ basedir="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 # base command
 cmdbase=(
 	"${basedir}/util.sh"
-	--programmer=avrdude-arduino )
+	--temp=/tmp/AVR )
 
 # cmdline or Arduino UNO
 unocmd=(
 	"${cmdbase[@]}"
 	--device=atmega328p
 	--programmer=avrdude-arduino
-	--temp=/tmp/AVR
 	--build=/tmp/AVR/backend
 	--src="${basedir}/backend"
 	--out=/tmp/AVR/backend.hex )
@@ -81,7 +80,6 @@ megacmd=(
 	"${cmdbase[@]}"
 	--device=atmega2560
 	--programmer=avrdude-wiring
-	--temp=/tmp/AVR
 	--build=/tmp/AVR/frontend
 	--src="${basedir}/frontend"
 	--out=/tmp/AVR/frontend.hex )
